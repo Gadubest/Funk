@@ -63,4 +63,59 @@ app.post("/addAutor", (req, res) => {
         }
     });
 });
+app.post("/addLivro", (req, res) => {
+    const name = req.body.name;
+    const autorname = req.body.autor;
+    db.query("SELECT * FROM livros WHERE nome = ?", [name], (err, results) => {
+        if (err) throw err;
+        if (results.length > 0) {
+            res.status(400).send("Livro já existe");
+        } else {
+            db.query("SELECT id FROM autores WHERE nome = ?", [autorname], (err, result) => {
+                if (err) throw err;
+                if (result.length === 0) {
+                    res.status(400).send("Autor não encontrado");
+                } else {
+                    db.query("INSERT INTO livros (nome, id_autor) VALUES (?, ?)", [name, result[0].id], (err, result) => {
+                        if (err) throw err;
+                        res.send(name + " inserido em livros");
+                    });
+                }
+            });
+        }
+    });
+});
 
+app.delete("/delete", (req, res) => {
+    db.query("DELETE FROM ?? WHERE nome = ?", [req.body.table, req.body.name], (err, result) => {
+        if (err) {
+            res.status(400).send(err.sqlMessage);
+        } else {
+            res.send(req.body.name + " deletado de " + req.body.table);
+        }
+    });
+});
+
+app.put("/update", (req, res) => {
+    db.query("UPDATE ?? SET nome = ? WHERE nome = ?", [req.body.table, req.body.newName, req.body.oldName], (err, result) => {
+        if (err) throw err;
+        res.send("Atualizado");
+    });
+});
+
+app.get("/getAutoresBySubstring/:substring", (req, res) => {
+    const substring = req.params.substring;
+    console.log(substring)
+    db.query("SELECT autores.nome as nome_autor, livros.nome as nome_livro FROM autores JOIN livros ON autores.id = livros.id_autor WHERE autores.nome LIKE ?", ['%' + substring + '%'], (err, result) => {
+        if (err) throw err;
+        res.json(result);
+    });
+});
+
+app.get("/getLivrosBySubstring/:substring", (req, res) => {
+    const substring = req.params.substring;
+    db.query("SELECT autores.nome as nome_autor, livros.nome as nome_livro FROM autores JOIN livros ON autores.id = livros.id_autor WHERE livros.nome LIKE ?", ['%' + substring + '%'], (err, result) => {
+        if (err) throw err;
+        res.json(result);
+    });
+});
