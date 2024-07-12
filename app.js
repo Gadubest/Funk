@@ -6,8 +6,8 @@ app.use(express.json());
 
 const db = mysql.createConnection({ // tem que lembrar de dar ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'; no workbench.
     host: 'localhost',
-    user: 'root',
-    password: 'root',
+    user: process.env.USER,
+    password: process.env.PASSWORD,
     //database : "biblioteca"
 });
 
