@@ -4,16 +4,19 @@ const mysql = require("mysql");
 const app = express();
 app.use(express.json());
 
-const db = mysql.createConnection({
+const db = mysql.createConnection({ // tem que lembrar de dar ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'; no workbench.
     host: 'localhost',
     user: 'root',
     password: 'root',
+    //database : "biblioteca"
 });
 
 function createOrUseDatabase() {
     db.connect(() => {
         db.query("CREATE DATABASE IF NOT EXISTS biblioteca", () => {
+        
             db.query("USE biblioteca", () => {
+                console.log("using biblioteca")
                 db.query("CREATE TABLE IF NOT EXISTS autores (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255))", () => {
                     db.query("CREATE TABLE IF NOT EXISTS livros (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255), id_autor INT, FOREIGN KEY (id_autor) REFERENCES autores(id))");
                 });
@@ -24,11 +27,12 @@ function createOrUseDatabase() {
 
 createOrUseDatabase();
 
+
 app.listen(3000, () => {
     console.log("Server is listening on port 3000");
 });
 
-app.get("/GETALL", (req, res) => {
+app.get("/getall", (req, res) => {
     db.query("SELECT autores.nome as nome_autor, livros.nome as nome_livro FROM autores JOIN livros ON autores.id = livros.id_autor", (err, result) => {
         if (err) throw err;
         res.json(result);
